@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
 import { Input } from '../components/Input'
+import { isSupabaseConfigured } from '../lib/supabase'
 
 export function LoginPage() {
   const { session, loading, signIn } = useAuth()
@@ -45,6 +46,13 @@ export function LoginPage() {
         </div>
 
         <Card>
+          {!isSupabaseConfigured ? (
+            <p className="mb-4 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              Faltam as variáveis <code className="font-semibold">VITE_SUPABASE_URL</code> e{' '}
+              <code className="font-semibold">VITE_SUPABASE_ANON_KEY</code> no deploy (Vercel →
+              Settings → Environment Variables). Depois, faça um Redeploy.
+            </p>
+          ) : null}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <Input
               label="Email"
