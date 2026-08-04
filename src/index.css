@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Nunito Sans", system-ui, sans-serif;
+
+  --color-cocoa-950: #1a0f0a;
+  --color-cocoa-900: #2c1810;
+  --color-cocoa-800: #3d2418;
+  --color-cocoa-700: #5c3a24;
+  --color-cocoa-600: #7a4e2d;
+  --color-honey-400: #d4a04a;
+  --color-honey-500: #c8953c;
+  --color-honey-600: #a87a2e;
+  --color-biscuit-50: #fff9f2;
+  --color-biscuit-100: #f7ebe0;
+  --color-biscuit-200: #edd9c6;
+  --color-dough-500: #e8c4a0;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-cocoa-900);
+    background-color: var(--color-biscuit-50);
+  }
+
+  body {
+    min-height: 100dvh;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% -10%, #f0d5b8 0%, transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, #e8c4a0 0%, transparent 50%),
+      linear-gradient(180deg, #fff9f2 0%, #f7ebe0 100%);
+    background-attachment: fixed;
+  }
+
+  #root {
+    min-height: 100dvh;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+}
