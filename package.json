@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backup": "node scripts/backup-supabase.mjs",
+    "restore": "node scripts/restore-supabase.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.0",

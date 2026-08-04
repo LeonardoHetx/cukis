@@ -47,6 +47,38 @@ npm run dev
 
 Abra o endereço do Vite (geralmente `http://localhost:5173`) e entre com o email/senha criados.
 
+## Backup automático (Supabase → GitHub)
+
+Todo dia o GitHub Action exporta os dados para a pasta [`backups/`](backups/) e faz commit no repo (mantém os últimos 30 dias + `latest/`).
+
+### Configurar uma vez
+
+No GitHub → **Settings → Secrets and variables → Actions**, crie:
+
+| Secret | Valor |
+|--------|--------|
+| `SUPABASE_URL` | `https://xxxxx.supabase.co` |
+| `SUPABASE_SECRET_KEY` | secret key (`sb_secret_...`) do Supabase |
+
+Depois: **Actions → Daily Supabase backup → Run workflow** (teste manual).
+
+### Local
+
+No `.env` (além das vars `VITE_`):
+
+```env
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+```
+
+```bash
+npm run backup                 # gera backups/latest + pasta datada
+npm run restore                # restaura backups/latest/data.json
+npm run restore -- caminho.json
+```
+
+O restore **apaga e recria** cookies/clientes/vendas/itens. Não mexe nos usuários de Auth.
+
 ## Deploy na Vercel
 
 1. Suba o repositório no GitHub
@@ -65,11 +97,13 @@ Se o login falhar por “Email not confirmed”, no Supabase vá em **Authentica
 
 ## Scripts
 
-| Comando         | Descrição              |
-|-----------------|------------------------|
-| `npm run dev`   | Desenvolvimento local  |
-| `npm run build` | Build de produção      |
-| `npm run preview` | Preview do build     |
+| Comando | Descrição |
+|---------|-----------|
+| `npm run dev` | Desenvolvimento local |
+| `npm run build` | Build de produção |
+| `npm run preview` | Preview do build |
+| `npm run backup` | Exporta dados do Supabase para `backups/` |
+| `npm run restore` | Restaura `backups/latest` no Supabase |
 
 ## Estrutura
 

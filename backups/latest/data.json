@@ -1,0 +1,221 @@
+{
+  "exported_at": "2026-08-04T20:04:54.437Z",
+  "source": "https://aqbbsdfhyhgdcqfdixou.supabase.co",
+  "tables": {
+    "cookies": [
+      {
+        "id": "cd120d36-5867-482d-add5-36afdb562658",
+        "name": "Chocolate Chip",
+        "default_price": 12,
+        "active": true,
+        "created_at": "2026-08-04T17:07:45.714704+00:00"
+      },
+      {
+        "id": "792b05f0-7123-40cc-a1e5-23791b8094af",
+        "name": "Nutella",
+        "default_price": 12,
+        "active": true,
+        "created_at": "2026-08-04T17:07:45.714704+00:00"
+      },
+      {
+        "id": "75895193-2ce4-4855-9be0-947662fa1773",
+        "name": "Frutas Vermelhas",
+        "default_price": 12,
+        "active": true,
+        "created_at": "2026-08-04T19:41:33.681615+00:00"
+      },
+      {
+        "id": "0d4d907f-ad38-486b-a280-a44130aa593b",
+        "name": "Dark Caramel",
+        "default_price": 12,
+        "active": true,
+        "created_at": "2026-08-04T19:41:44.249001+00:00"
+      }
+    ],
+    "customers": [
+      {
+        "id": "2a672aa4-2ceb-412e-a494-045384c9bd87",
+        "name": "Gnvf",
+        "created_at": "2026-08-04T17:24:33.081462+00:00"
+      },
+      {
+        "id": "08b2d68c-bd04-4d06-be45-bef05ea9ee2b",
+        "name": "Gustavo EscalaSaas",
+        "created_at": "2026-08-04T18:42:38.52604+00:00"
+      },
+      {
+        "id": "48746d80-2c72-4feb-a201-952eeaeeeb70",
+        "name": "Vitor EscalaSaas",
+        "created_at": "2026-08-04T19:42:15.277383+00:00"
+      },
+      {
+        "id": "dda796b0-e78f-45d2-9538-b750ac8a4ac0",
+        "name": "Marco EscalaSaas",
+        "created_at": "2026-08-04T19:43:17.21265+00:00"
+      },
+      {
+        "id": "38613b88-0eaa-441d-a8c3-3428258fce74",
+        "name": "Nicolas EscalaSaas",
+        "created_at": "2026-08-04T19:44:11.808661+00:00"
+      },
+      {
+        "id": "68a396fc-6d13-4937-bac3-99080e9e246f",
+        "name": "Bruna EscalaSaas",
+        "created_at": "2026-08-04T19:47:32.009998+00:00"
+      },
+      {
+        "id": "11a204ff-31b3-489f-bd1d-086c9b68dbb7",
+        "name": "Edson EscalaSaas",
+        "created_at": "2026-08-04T19:50:27.262867+00:00"
+      },
+      {
+        "id": "cf116e40-0f11-4318-b9cc-83984501a771",
+        "name": "Leonay EscalaSaas",
+        "created_at": "2026-08-04T19:51:14.301873+00:00"
+      }
+    ],
+    "sales": [
+      {
+        "id": "ae375e1f-73c0-4d69-b1c5-772eba19a361",
+        "customer_id": "38613b88-0eaa-441d-a8c3-3428258fce74",
+        "sold_at": "2026-08-04T15:00:00+00:00",
+        "created_at": "2026-08-04T19:44:12.064386+00:00",
+        "paid": false
+      },
+      {
+        "id": "1d80b5d7-2915-49b9-8fdc-5a0e0006865f",
+        "customer_id": "dda796b0-e78f-45d2-9538-b750ac8a4ac0",
+        "sold_at": "2026-08-04T15:00:00+00:00",
+        "created_at": "2026-08-04T19:43:17.406992+00:00",
+        "paid": false
+      },
+      {
+        "id": "03255681-b4c4-42ae-bf22-5240f95eb56c",
+        "customer_id": "08b2d68c-bd04-4d06-be45-bef05ea9ee2b",
+        "sold_at": "2026-08-04T15:00:00+00:00",
+        "created_at": "2026-08-04T18:42:38.752982+00:00",
+        "paid": true
+      },
+      {
+        "id": "610dc747-8b3d-4dcd-a505-06abd8bc9c78",
+        "customer_id": "48746d80-2c72-4feb-a201-952eeaeeeb70",
+        "sold_at": "2026-08-04T15:00:00+00:00",
+        "created_at": "2026-08-04T19:42:15.592909+00:00",
+        "paid": false
+      },
+      {
+        "id": "d4f0e866-27aa-4b7a-88a0-ea61af87235c",
+        "customer_id": "68a396fc-6d13-4937-bac3-99080e9e246f",
+        "sold_at": "2026-08-04T15:00:00+00:00",
+        "created_at": "2026-08-04T19:47:32.221519+00:00",
+        "paid": true
+      },
+      {
+        "id": "4e453906-f55b-4837-98d2-22d05c131720",
+        "customer_id": "11a204ff-31b3-489f-bd1d-086c9b68dbb7",
+        "sold_at": "2026-08-04T15:00:00+00:00",
+        "created_at": "2026-08-04T19:50:27.782625+00:00",
+        "paid": false
+      },
+      {
+        "id": "315a884f-b11d-47b3-826a-10b10f71c13c",
+        "customer_id": "cf116e40-0f11-4318-b9cc-83984501a771",
+        "sold_at": "2026-08-04T15:00:00+00:00",
+        "created_at": "2026-08-04T19:51:14.494903+00:00",
+        "paid": true
+      }
+    ],
+    "sale_items": [
+      {
+        "id": "9d1d6e38-143d-4835-926a-008d1d590844",
+        "sale_id": "ae375e1f-73c0-4d69-b1c5-772eba19a361",
+        "cookie_id": "792b05f0-7123-40cc-a1e5-23791b8094af",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:44:12.312655+00:00"
+      },
+      {
+        "id": "3d86ab2f-26c2-4306-97bf-3f94b752c857",
+        "sale_id": "1d80b5d7-2915-49b9-8fdc-5a0e0006865f",
+        "cookie_id": "0d4d907f-ad38-486b-a280-a44130aa593b",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:44:35.365801+00:00"
+      },
+      {
+        "id": "017c3a5c-d8af-4f08-bb7e-200782c800cd",
+        "sale_id": "1d80b5d7-2915-49b9-8fdc-5a0e0006865f",
+        "cookie_id": "75895193-2ce4-4855-9be0-947662fa1773",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:44:35.365801+00:00"
+      },
+      {
+        "id": "f28d7820-3299-4ae8-9403-fc9d2d792c4b",
+        "sale_id": "03255681-b4c4-42ae-bf22-5240f95eb56c",
+        "cookie_id": "cd120d36-5867-482d-add5-36afdb562658",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:44:54.16308+00:00"
+      },
+      {
+        "id": "a0e08a16-7685-484c-a12b-60e697e932dd",
+        "sale_id": "610dc747-8b3d-4dcd-a505-06abd8bc9c78",
+        "cookie_id": "75895193-2ce4-4855-9be0-947662fa1773",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:45:10.102218+00:00"
+      },
+      {
+        "id": "25fe7eb7-377d-4bbb-8fd4-00191d6f164b",
+        "sale_id": "610dc747-8b3d-4dcd-a505-06abd8bc9c78",
+        "cookie_id": "792b05f0-7123-40cc-a1e5-23791b8094af",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:45:10.102218+00:00"
+      },
+      {
+        "id": "0433f25c-74c2-4e9a-b7a8-825f4becfc5c",
+        "sale_id": "610dc747-8b3d-4dcd-a505-06abd8bc9c78",
+        "cookie_id": "792b05f0-7123-40cc-a1e5-23791b8094af",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:45:10.102218+00:00"
+      },
+      {
+        "id": "78ea5159-d466-4b43-8450-f63e12e0e321",
+        "sale_id": "d4f0e866-27aa-4b7a-88a0-ea61af87235c",
+        "cookie_id": "75895193-2ce4-4855-9be0-947662fa1773",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:47:32.672407+00:00"
+      },
+      {
+        "id": "90ecc615-6f78-4061-973d-ae00fe3c456f",
+        "sale_id": "4e453906-f55b-4837-98d2-22d05c131720",
+        "cookie_id": "792b05f0-7123-40cc-a1e5-23791b8094af",
+        "quantity": 1,
+        "unit_price": 10,
+        "total": 10,
+        "created_at": "2026-08-04T19:50:28.041296+00:00"
+      },
+      {
+        "id": "979793be-8cf4-462f-a9e8-91fb1029fe97",
+        "sale_id": "315a884f-b11d-47b3-826a-10b10f71c13c",
+        "cookie_id": "792b05f0-7123-40cc-a1e5-23791b8094af",
+        "quantity": 5,
+        "unit_price": 10,
+        "total": 50,
+        "created_at": "2026-08-04T19:51:14.973258+00:00"
+      }
+    ]
+  }
+}
