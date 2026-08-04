@@ -40,6 +40,13 @@ export function DashboardPage() {
 
   const stats = useMemo(() => {
     const totalRevenue = sales.reduce((s, sale) => s + Number(sale.total), 0)
+    const paidTotal = sales
+      .filter((sale) => sale.paid)
+      .reduce((s, sale) => s + Number(sale.total), 0)
+    const unpaidTotal = sales
+      .filter((sale) => !sale.paid)
+      .reduce((s, sale) => s + Number(sale.total), 0)
+    const unpaidCount = sales.filter((sale) => !sale.paid).length
     const totalQty = sales.reduce((s, sale) => s + sale.quantity, 0)
     const customerIds = new Set(sales.map((s) => s.customer_id))
 
@@ -74,6 +81,9 @@ export function DashboardPage() {
 
     return {
       totalRevenue,
+      paidTotal,
+      unpaidTotal,
+      unpaidCount,
       totalQty,
       customerCount: customerIds.size,
       salesCount: sales.length,
@@ -115,22 +125,28 @@ export function DashboardPage() {
         <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard label="Total vendido" value={formatCurrency(stats.totalRevenue)} />
+        <StatCard
+          label="Recebido"
+          value={formatCurrency(stats.paidTotal)}
+          hint="Vendas marcadas como pagas"
+        />
+        <StatCard
+          label="A receber"
+          value={formatCurrency(stats.unpaidTotal)}
+          hint={
+            stats.unpaidCount
+              ? `${stats.unpaidCount} venda(s) pendente(s)`
+              : 'Nenhuma pendência'
+          }
+        />
         <StatCard
           label="Cookies vendidos"
           value={String(stats.totalQty)}
           hint={`${stats.salesCount} venda(s)`}
         />
         <StatCard label="Clientes" value={String(stats.customerCount)} />
-        <StatCard
-          label="Ticket médio"
-          value={
-            stats.salesCount
-              ? formatCurrency(stats.totalRevenue / stats.salesCount)
-              : formatCurrency(0)
-          }
-        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

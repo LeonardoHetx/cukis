@@ -33,6 +33,7 @@ create table if not exists public.sales (
   quantity integer not null check (quantity > 0),
   unit_price numeric(10, 2) not null check (unit_price >= 0),
   total numeric(10, 2) not null check (total >= 0),
+  paid boolean not null default false,
   sold_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
@@ -40,6 +41,7 @@ create table if not exists public.sales (
 create index if not exists sales_sold_at_idx on public.sales (sold_at desc);
 create index if not exists sales_customer_id_idx on public.sales (customer_id);
 create index if not exists sales_cookie_id_idx on public.sales (cookie_id);
+create index if not exists sales_paid_idx on public.sales (paid);
 
 -- RLS: apenas usuários autenticados
 alter table public.cookies enable row level security;

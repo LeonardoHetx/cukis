@@ -17,6 +17,7 @@ export function NewSalePage() {
   const [quantity, setQuantity] = useState(1)
   const [unitPrice, setUnitPrice] = useState('')
   const [soldAt, setSoldAt] = useState(toDateInputValue())
+  const [paid, setPaid] = useState(false)
   const [priceTouched, setPriceTouched] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -78,6 +79,7 @@ export function NewSalePage() {
         quantity,
         unit_price: unit,
         total,
+        paid,
         sold_at: soldAtIso,
       })
 
@@ -163,6 +165,16 @@ export function NewSalePage() {
             value={soldAt}
             onChange={(e) => setSoldAt(e.target.value)}
           />
+
+          <label className="flex items-center gap-3 rounded-xl border border-biscuit-200 bg-white/60 px-4 py-3 text-sm font-semibold text-cocoa-800">
+            <input
+              type="checkbox"
+              checked={paid}
+              onChange={(e) => setPaid(e.target.checked)}
+              className="size-4 rounded border-biscuit-200 accent-honey-500"
+            />
+            Já pagou
+          </label>
 
           <div className="rounded-xl bg-biscuit-100/80 px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-700/55">

@@ -19,6 +19,7 @@ export type Sale = {
   quantity: number
   unit_price: number
   total: number
+  paid: boolean
   sold_at: string
   created_at: string
 }

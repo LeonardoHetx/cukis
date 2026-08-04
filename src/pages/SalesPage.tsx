@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
 import { Input, Select } from '../components/Input'
+import { PaymentBadge } from '../components/PaymentBadge'
 import { formatCurrency, formatDate, toDateInputValue } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import type { Cookie, SaleWithRelations } from '../types/database'
+
+type PaidFilter = 'all' | 'paid' | 'unpaid'
 
 export function SalesPage() {
   const [sales, setSales] = useState<SaleWithRelations[]>([])
@@ -15,6 +18,7 @@ export function SalesPage() {
 
   const [customerFilter, setCustomerFilter] = useState('')
   const [cookieFilter, setCookieFilter] = useState('')
+  const [paidFilter, setPaidFilter] = useState<PaidFilter>('all')
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
 
@@ -22,6 +26,7 @@ export function SalesPage() {
   const [editQty, setEditQty] = useState(1)
   const [editPrice, setEditPrice] = useState('')
   const [editDate, setEditDate] = useState('')
+  const [editPaid, setEditPaid] = useState(false)
   const [saving, setSaving] = useState(false)
 
   const load = useCallback(async () => {
@@ -34,6 +39,8 @@ export function SalesPage() {
       .order('sold_at', { ascending: false })
 
     if (cookieFilter) query = query.eq('cookie_id', cookieFilter)
+    if (paidFilter === 'paid') query = query.eq('paid', true)
+    if (paidFilter === 'unpaid') query = query.eq('paid', false)
     if (fromDate) query = query.gte('sold_at', `${fromDate}T00:00:00`)
     if (toDate) query = query.lte('sold_at', `${toDate}T23:59:59`)
 
@@ -57,7 +64,7 @@ export function SalesPage() {
     setSales(rows)
     setCookies((cookieData as Cookie[]) ?? [])
     setLoading(false)
-  }, [customerFilter, cookieFilter, fromDate, toDate])
+  }, [customerFilter, cookieFilter, paidFilter, fromDate, toDate])
 
   useEffect(() => {
     load()
@@ -68,6 +75,7 @@ export function SalesPage() {
     setEditQty(sale.quantity)
     setEditPrice(String(sale.unit_price))
     setEditDate(toDateInputValue(sale.sold_at))
+    setEditPaid(Boolean(sale.paid))
   }
 
   async function handleSaveEdit(e: FormEvent) {
@@ -82,6 +90,7 @@ export function SalesPage() {
         quantity: editQty,
         unit_price: unit,
         total,
+        paid: editPaid,
         sold_at: new Date(`${editDate}T12:00:00`).toISOString(),
       })
       .eq('id', editing.id)
@@ -92,6 +101,19 @@ export function SalesPage() {
       return
     }
     setEditing(null)
+    await load()
+  }
+
+  async function togglePaid(sale: SaleWithRelations) {
+    const { error: updateError } = await supabase
+      .from('sales')
+      .update({ paid: !sale.paid })
+      .eq('id', sale.id)
+
+    if (updateError) {
+      setError(updateError.message)
+      return
+    }
     await load()
   }
 
@@ -106,6 +128,9 @@ export function SalesPage() {
   }
 
   const filteredTotal = sales.reduce((sum, s) => sum + Number(s.total), 0)
+  const unpaidTotal = sales
+    .filter((s) => !s.paid)
+    .reduce((sum, s) => sum + Number(s.total), 0)
 
   return (
     <div className="space-y-6">
@@ -113,7 +138,11 @@ export function SalesPage() {
         <div>
           <h2 className="font-display text-3xl font-bold text-cocoa-900">Vendas</h2>
           <p className="mt-1 text-sm text-cocoa-700/70">
-            {loading ? 'Carregando…' : `${sales.length} venda(s) · ${formatCurrency(filteredTotal)}`}
+            {loading
+              ? 'Carregando…'
+              : `${sales.length} venda(s) · ${formatCurrency(filteredTotal)}${
+                  unpaidTotal > 0 ? ` · ${formatCurrency(unpaidTotal)} pendente` : ''
+                }`}
           </p>
         </div>
         <Link to="/vendas/nova">
@@ -122,7 +151,7 @@ export function SalesPage() {
       </div>
 
       <Card className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <Input
             label="Cliente"
             placeholder="Buscar cliente"
@@ -140,6 +169,15 @@ export function SalesPage() {
                 {c.name}
               </option>
             ))}
+          </Select>
+          <Select
+            label="Pagamento"
+            value={paidFilter}
+            onChange={(e) => setPaidFilter(e.target.value as PaidFilter)}
+          >
+            <option value="all">Todos</option>
+            <option value="paid">Pagos</option>
+            <option value="unpaid">Pendentes</option>
           </Select>
           <Input
             label="De"
@@ -190,6 +228,15 @@ export function SalesPage() {
                 onChange={(e) => setEditDate(e.target.value)}
               />
             </div>
+            <label className="flex items-center gap-3 text-sm font-semibold text-cocoa-800">
+              <input
+                type="checkbox"
+                checked={editPaid}
+                onChange={(e) => setEditPaid(e.target.checked)}
+                className="size-4 rounded border-biscuit-200 accent-honey-500"
+              />
+              Já pagou
+            </label>
             <p className="text-sm font-semibold">
               Total: {formatCurrency(editQty * (Number.parseFloat(editPrice) || 0))}
             </p>
@@ -214,16 +261,22 @@ export function SalesPage() {
 
         {sales.map((sale) => (
           <Card key={sale.id} className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-semibold text-cocoa-900">{sale.customers?.name ?? '—'}</p>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold text-cocoa-900">{sale.customers?.name ?? '—'}</p>
+                <PaymentBadge paid={Boolean(sale.paid)} />
+              </div>
               <p className="text-sm text-cocoa-700/70">
                 {sale.cookies?.name ?? '—'} · {sale.quantity} un. · {formatDate(sale.sold_at)}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <p className="font-display text-xl font-bold text-cocoa-900">
                 {formatCurrency(Number(sale.total))}
               </p>
+              <Button variant="ghost" size="sm" onClick={() => togglePaid(sale)}>
+                {sale.paid ? 'Marcar pendente' : 'Marcar pago'}
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => startEdit(sale)}>
                 Editar
               </Button>
