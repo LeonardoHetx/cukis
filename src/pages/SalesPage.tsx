@@ -16,7 +16,7 @@ function newLine(cookieId = '', defaultPrice = ''): SaleLineDraft {
   return {
     key: crypto.randomUUID(),
     cookie_id: cookieId,
-    quantity: 1,
+    quantity: '1',
     unit_price: defaultPrice,
     priceTouched: true,
   }
@@ -93,7 +93,7 @@ export function SalesPage() {
       (sale.sale_items ?? []).map((item) => ({
         key: item.id,
         cookie_id: item.cookie_id,
-        quantity: item.quantity,
+        quantity: String(item.quantity),
         unit_price: String(item.unit_price),
         priceTouched: true,
       })),
@@ -111,12 +111,13 @@ export function SalesPage() {
     if (!editing) return
 
     const items = editLines.map((line) => {
+      const quantity = Number.parseInt(line.quantity, 10) || 0
       const unit = Number.parseFloat(line.unit_price) || 0
       return {
         cookie_id: line.cookie_id,
-        quantity: line.quantity,
+        quantity,
         unit_price: unit,
-        total: line.quantity * unit,
+        total: quantity * unit,
       }
     })
 
@@ -342,12 +343,13 @@ export function SalesPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <Input
                       label="Qtd"
-                      type="number"
-                      min={1}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={line.quantity}
                       onChange={(e) =>
                         updateEditLine(line.key, {
-                          quantity: Number.parseInt(e.target.value, 10) || 1,
+                          quantity: e.target.value.replace(/\D/g, ''),
                         })
                       }
                     />
@@ -370,8 +372,9 @@ export function SalesPage() {
               Total:{' '}
               {formatCurrency(
                 editLines.reduce((sum, line) => {
+                  const qty = Number.parseInt(line.quantity, 10) || 0
                   const unit = Number.parseFloat(line.unit_price) || 0
-                  return sum + line.quantity * unit
+                  return sum + qty * unit
                 }, 0),
               )}
             </p>

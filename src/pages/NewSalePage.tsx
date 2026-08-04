@@ -13,7 +13,7 @@ function newLine(cookieId = '', defaultPrice = ''): SaleLineDraft {
   return {
     key: crypto.randomUUID(),
     cookie_id: cookieId,
-    quantity: 1,
+    quantity: '1',
     unit_price: defaultPrice,
     priceTouched: false,
   }
@@ -51,8 +51,9 @@ export function NewSalePage() {
   const total = useMemo(
     () =>
       lines.reduce((sum, line) => {
+        const qty = Number.parseInt(line.quantity, 10) || 0
         const unit = Number.parseFloat(line.unit_price) || 0
-        return sum + line.quantity * unit
+        return sum + qty * unit
       }, 0),
     [lines],
   )
@@ -103,12 +104,13 @@ export function NewSalePage() {
     }
 
     const items = lines.map((line) => {
+      const quantity = Number.parseInt(line.quantity, 10) || 0
       const unit = Number.parseFloat(line.unit_price) || 0
       return {
         cookie_id: line.cookie_id,
-        quantity: line.quantity,
+        quantity,
         unit_price: unit,
-        total: line.quantity * unit,
+        total: quantity * unit,
       }
     })
 
@@ -239,14 +241,14 @@ export function NewSalePage() {
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Quantidade"
-                    type="number"
-                    min={1}
-                    step={1}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     required
                     value={line.quantity}
                     onChange={(e) =>
                       updateLine(line.key, {
-                        quantity: Number.parseInt(e.target.value, 10) || 1,
+                        quantity: e.target.value.replace(/\D/g, ''),
                       })
                     }
                   />

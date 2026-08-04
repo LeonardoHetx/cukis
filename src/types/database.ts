@@ -51,7 +51,7 @@ export type CustomerStats = {
 export type SaleLineDraft = {
   key: string
   cookie_id: string
-  quantity: number
+  quantity: string
   unit_price: string
   priceTouched: boolean
 }
