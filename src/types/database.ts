@@ -12,13 +12,23 @@ export type Customer = {
   created_at: string
 }
 
-export type Sale = {
+export type SaleItem = {
   id: string
-  customer_id: string
+  sale_id: string
   cookie_id: string
   quantity: number
   unit_price: number
   total: number
+  created_at: string
+}
+
+export type SaleItemWithCookie = SaleItem & {
+  cookies: Pick<Cookie, 'id' | 'name'> | null
+}
+
+export type Sale = {
+  id: string
+  customer_id: string
   paid: boolean
   sold_at: string
   created_at: string
@@ -26,7 +36,7 @@ export type Sale = {
 
 export type SaleWithRelations = Sale & {
   customers: Pick<Customer, 'id' | 'name'> | null
-  cookies: Pick<Cookie, 'id' | 'name'> | null
+  sale_items: SaleItemWithCookie[]
 }
 
 export type CustomerStats = {
@@ -36,4 +46,12 @@ export type CustomerStats = {
   total_spent: number
   total_quantity: number
   sales_count: number
+}
+
+export type SaleLineDraft = {
+  key: string
+  cookie_id: string
+  quantity: number
+  unit_price: string
+  priceTouched: boolean
 }

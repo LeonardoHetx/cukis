@@ -1,7 +1,6 @@
 -- Cukis — schema do banco
--- Cole e execute no SQL Editor do Supabase
+-- Cole e execute no SQL Editor do Supabase (projeto novo)
 
--- Extensão para UUID
 create extension if not exists "pgcrypto";
 
 -- Sabores de cookies
@@ -21,32 +20,39 @@ create table if not exists public.customers (
   constraint customers_name_unique unique (name)
 );
 
--- Índice case-insensitive para busca de clientes
 create unique index if not exists customers_name_lower_idx
   on public.customers (lower(trim(name)));
 
--- Vendas
+-- Venda (cabeçalho)
 create table if not exists public.sales (
   id uuid primary key default gen_random_uuid(),
   customer_id uuid not null references public.customers (id) on delete restrict,
-  cookie_id uuid not null references public.cookies (id) on delete restrict,
-  quantity integer not null check (quantity > 0),
-  unit_price numeric(10, 2) not null check (unit_price >= 0),
-  total numeric(10, 2) not null check (total >= 0),
   paid boolean not null default false,
   sold_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
 
+-- Itens da venda (vários sabores por venda)
+create table if not exists public.sale_items (
+  id uuid primary key default gen_random_uuid(),
+  sale_id uuid not null references public.sales (id) on delete cascade,
+  cookie_id uuid not null references public.cookies (id) on delete restrict,
+  quantity integer not null check (quantity > 0),
+  unit_price numeric(10, 2) not null check (unit_price >= 0),
+  total numeric(10, 2) not null check (total >= 0),
+  created_at timestamptz not null default now()
+);
+
 create index if not exists sales_sold_at_idx on public.sales (sold_at desc);
 create index if not exists sales_customer_id_idx on public.sales (customer_id);
-create index if not exists sales_cookie_id_idx on public.sales (cookie_id);
 create index if not exists sales_paid_idx on public.sales (paid);
+create index if not exists sale_items_sale_id_idx on public.sale_items (sale_id);
+create index if not exists sale_items_cookie_id_idx on public.sale_items (cookie_id);
 
--- RLS: apenas usuários autenticados
 alter table public.cookies enable row level security;
 alter table public.customers enable row level security;
 alter table public.sales enable row level security;
+alter table public.sale_items enable row level security;
 
 create policy "Authenticated users can manage cookies"
   on public.cookies for all
@@ -66,7 +72,12 @@ create policy "Authenticated users can manage sales"
   using (true)
   with check (true);
 
--- Sabores de exemplo (opcional — remova se não quiser)
+create policy "Authenticated users can manage sale_items"
+  on public.sale_items for all
+  to authenticated
+  using (true)
+  with check (true);
+
 insert into public.cookies (name, default_price)
 select * from (values
   ('Chocolate Chip', 8.00::numeric),

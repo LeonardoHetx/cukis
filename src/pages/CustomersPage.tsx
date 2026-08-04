@@ -18,7 +18,9 @@ export function CustomersPage() {
     const [{ data: customerData, error: customerError }, { data: salesData, error: salesError }] =
       await Promise.all([
         supabase.from('customers').select('*').order('name'),
-        supabase.from('sales').select('customer_id, quantity, total'),
+        supabase
+          .from('sales')
+          .select('id, customer_id, sale_items(quantity, total)'),
       ])
 
     if (customerError || salesError) {
@@ -38,8 +40,9 @@ export function CustomersPage() {
         total_quantity: 0,
         sales_count: 0,
       }
-      current.total_spent += Number(sale.total)
-      current.total_quantity += sale.quantity
+      const items = (sale.sale_items as { quantity: number; total: number }[] | null) ?? []
+      current.total_spent += items.reduce((sum, item) => sum + Number(item.total), 0)
+      current.total_quantity += items.reduce((sum, item) => sum + item.quantity, 0)
       current.sales_count += 1
       stats.set(sale.customer_id, current)
     }

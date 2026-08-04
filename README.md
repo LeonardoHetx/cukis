@@ -8,6 +8,7 @@ Sistema simples de vendas de cookies — anote cliente, sabor, quantidade e valo
 
 - Login com email/senha (Supabase Auth)
 - Cadastro de sabores com preço padrão
+- Nova venda com **vários sabores** na mesma venda
 - Nova venda com valor automático do sabor (editável)
 - Marcar venda como **paga** ou **pendente** (filtro + toggle rápido)
 - Cliente digitado na venda: se for novo, cadastra; se já existe, reutiliza (autocomplete)

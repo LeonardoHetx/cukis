@@ -7,18 +7,25 @@ import { Input, Select } from '../components/Input'
 import { findOrCreateCustomer } from '../lib/customers'
 import { formatCurrency, toDateInputValue } from '../lib/format'
 import { supabase } from '../lib/supabase'
-import type { Cookie } from '../types/database'
+import type { Cookie, SaleLineDraft } from '../types/database'
+
+function newLine(cookieId = '', defaultPrice = ''): SaleLineDraft {
+  return {
+    key: crypto.randomUUID(),
+    cookie_id: cookieId,
+    quantity: 1,
+    unit_price: defaultPrice,
+    priceTouched: false,
+  }
+}
 
 export function NewSalePage() {
   const navigate = useNavigate()
   const [cookies, setCookies] = useState<Cookie[]>([])
   const [customerName, setCustomerName] = useState('')
-  const [cookieId, setCookieId] = useState('')
-  const [quantity, setQuantity] = useState(1)
-  const [unitPrice, setUnitPrice] = useState('')
   const [soldAt, setSoldAt] = useState(toDateInputValue())
   const [paid, setPaid] = useState(false)
-  const [priceTouched, setPriceTouched] = useState(false)
+  const [lines, setLines] = useState<SaleLineDraft[]>([newLine()])
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -36,20 +43,51 @@ export function NewSalePage() {
         const list = (data as Cookie[]) ?? []
         setCookies(list)
         if (list.length > 0) {
-          setCookieId(list[0].id)
-          setUnitPrice(String(list[0].default_price))
+          setLines([newLine(list[0].id, String(list[0].default_price))])
         }
       })
   }, [])
 
-  useEffect(() => {
-    if (priceTouched || !cookieId) return
-    const cookie = cookies.find((c) => c.id === cookieId)
-    if (cookie) setUnitPrice(String(cookie.default_price))
-  }, [cookieId, cookies, priceTouched])
+  const total = useMemo(
+    () =>
+      lines.reduce((sum, line) => {
+        const unit = Number.parseFloat(line.unit_price) || 0
+        return sum + line.quantity * unit
+      }, 0),
+    [lines],
+  )
 
-  const unit = Number.parseFloat(unitPrice) || 0
-  const total = useMemo(() => quantity * unit, [quantity, unit])
+  function updateLine(key: string, patch: Partial<SaleLineDraft>) {
+    setLines((prev) => prev.map((line) => (line.key === key ? { ...line, ...patch } : line)))
+  }
+
+  function setCookieOnLine(key: string, cookieId: string) {
+    const cookie = cookies.find((c) => c.id === cookieId)
+    setLines((prev) =>
+      prev.map((line) => {
+        if (line.key !== key) return line
+        return {
+          ...line,
+          cookie_id: cookieId,
+          unit_price: line.priceTouched
+            ? line.unit_price
+            : String(cookie?.default_price ?? line.unit_price),
+        }
+      }),
+    )
+  }
+
+  function addLine() {
+    const first = cookies[0]
+    setLines((prev) => [
+      ...prev,
+      newLine(first?.id ?? '', first ? String(first.default_price) : ''),
+    ])
+  }
+
+  function removeLine(key: string) {
+    setLines((prev) => (prev.length <= 1 ? prev : prev.filter((line) => line.key !== key)))
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -59,12 +97,23 @@ export function NewSalePage() {
       setError('Informe o nome do cliente')
       return
     }
-    if (!cookieId) {
+    if (cookies.length === 0) {
       setError('Cadastre um sabor antes de registrar vendas')
       return
     }
-    if (quantity < 1) {
-      setError('Quantidade deve ser pelo menos 1')
+
+    const items = lines.map((line) => {
+      const unit = Number.parseFloat(line.unit_price) || 0
+      return {
+        cookie_id: line.cookie_id,
+        quantity: line.quantity,
+        unit_price: unit,
+        total: line.quantity * unit,
+      }
+    })
+
+    if (items.some((item) => !item.cookie_id || item.quantity < 1)) {
+      setError('Preencha sabor e quantidade em todos os itens')
       return
     }
 
@@ -73,17 +122,30 @@ export function NewSalePage() {
       const customer = await findOrCreateCustomer(customerName)
       const soldAtIso = new Date(`${soldAt}T12:00:00`).toISOString()
 
-      const { error: insertError } = await supabase.from('sales').insert({
-        customer_id: customer.id,
-        cookie_id: cookieId,
-        quantity,
-        unit_price: unit,
-        total,
-        paid,
-        sold_at: soldAtIso,
-      })
+      const { data: sale, error: saleError } = await supabase
+        .from('sales')
+        .insert({
+          customer_id: customer.id,
+          paid,
+          sold_at: soldAtIso,
+        })
+        .select('id')
+        .single()
 
-      if (insertError) throw insertError
+      if (saleError) throw saleError
+
+      const { error: itemsError } = await supabase.from('sale_items').insert(
+        items.map((item) => ({
+          sale_id: sale.id,
+          ...item,
+        })),
+      )
+
+      if (itemsError) {
+        await supabase.from('sales').delete().eq('id', sale.id)
+        throw itemsError
+      }
+
       navigate('/vendas')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar venda')
@@ -97,7 +159,7 @@ export function NewSalePage() {
       <div>
         <h2 className="font-display text-3xl font-bold text-cocoa-900">Nova venda</h2>
         <p className="mt-1 text-sm text-cocoa-700/70">
-          Anote rápido — o valor vem do sabor e pode ser ajustado
+          Adicione quantos sabores quiser na mesma venda
         </p>
       </div>
 
@@ -108,54 +170,6 @@ export function NewSalePage() {
             onChange={setCustomerName}
             required
           />
-
-          <Select
-            label="Sabor"
-            name="cookie"
-            value={cookieId}
-            onChange={(e) => {
-              setCookieId(e.target.value)
-              setPriceTouched(false)
-            }}
-            required
-          >
-            {cookies.length === 0 ? (
-              <option value="">Nenhum sabor ativo</option>
-            ) : (
-              cookies.map((cookie) => (
-                <option key={cookie.id} value={cookie.id}>
-                  {cookie.name} — {formatCurrency(Number(cookie.default_price))}
-                </option>
-              ))
-            )}
-          </Select>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Quantidade"
-              type="number"
-              name="quantity"
-              min={1}
-              step={1}
-              required
-              value={quantity}
-              onChange={(e) => setQuantity(Number.parseInt(e.target.value, 10) || 1)}
-            />
-            <Input
-              label="Valor unitário (R$)"
-              type="number"
-              name="unit_price"
-              min={0}
-              step="0.01"
-              required
-              value={unitPrice}
-              onChange={(e) => {
-                setPriceTouched(true)
-                setUnitPrice(e.target.value)
-              }}
-              hint="Preenchido pelo sabor; edite se quiser"
-            />
-          </div>
 
           <Input
             label="Data da venda"
@@ -175,6 +189,85 @@ export function NewSalePage() {
             />
             Já pagou
           </label>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-cocoa-800">Itens</h3>
+              <Button type="button" variant="ghost" size="sm" onClick={addLine} disabled={cookies.length === 0}>
+                + Adicionar sabor
+              </Button>
+            </div>
+
+            {lines.map((line, index) => (
+              <div
+                key={line.key}
+                className="space-y-3 rounded-xl border border-biscuit-200 bg-white/50 p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-700/55">
+                    Item {index + 1}
+                  </p>
+                  {lines.length > 1 ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeLine(line.key)}
+                    >
+                      Remover
+                    </Button>
+                  ) : null}
+                </div>
+
+                <Select
+                  label="Sabor"
+                  value={line.cookie_id}
+                  onChange={(e) => setCookieOnLine(line.key, e.target.value)}
+                  required
+                >
+                  {cookies.length === 0 ? (
+                    <option value="">Nenhum sabor ativo</option>
+                  ) : (
+                    cookies.map((cookie) => (
+                      <option key={cookie.id} value={cookie.id}>
+                        {cookie.name} — {formatCurrency(Number(cookie.default_price))}
+                      </option>
+                    ))
+                  )}
+                </Select>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Quantidade"
+                    type="number"
+                    min={1}
+                    step={1}
+                    required
+                    value={line.quantity}
+                    onChange={(e) =>
+                      updateLine(line.key, {
+                        quantity: Number.parseInt(e.target.value, 10) || 1,
+                      })
+                    }
+                  />
+                  <Input
+                    label="Valor unitário (R$)"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    required
+                    value={line.unit_price}
+                    onChange={(e) =>
+                      updateLine(line.key, {
+                        unit_price: e.target.value,
+                        priceTouched: true,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
 
           <div className="rounded-xl bg-biscuit-100/80 px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-cocoa-700/55">

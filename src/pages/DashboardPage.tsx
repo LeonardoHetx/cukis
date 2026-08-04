@@ -4,6 +4,7 @@ import { Button } from '../components/Button'
 import { Card, StatCard } from '../components/Card'
 import { Input } from '../components/Input'
 import { formatCurrency } from '../lib/format'
+import { SALE_SELECT, saleQuantity, saleTotal } from '../lib/sales'
 import { supabase } from '../lib/supabase'
 import type { SaleWithRelations } from '../types/database'
 
@@ -22,7 +23,7 @@ export function DashboardPage() {
 
     let query = supabase
       .from('sales')
-      .select('*, customers(id, name), cookies(id, name)')
+      .select(SALE_SELECT)
       .order('sold_at', { ascending: false })
 
     if (fromDate) query = query.gte('sold_at', `${fromDate}T00:00:00`)
@@ -39,26 +40,28 @@ export function DashboardPage() {
   }, [load])
 
   const stats = useMemo(() => {
-    const totalRevenue = sales.reduce((s, sale) => s + Number(sale.total), 0)
+    const totalRevenue = sales.reduce((s, sale) => s + saleTotal(sale), 0)
     const paidTotal = sales
       .filter((sale) => sale.paid)
-      .reduce((s, sale) => s + Number(sale.total), 0)
+      .reduce((s, sale) => s + saleTotal(sale), 0)
     const unpaidTotal = sales
       .filter((sale) => !sale.paid)
-      .reduce((s, sale) => s + Number(sale.total), 0)
+      .reduce((s, sale) => s + saleTotal(sale), 0)
     const unpaidCount = sales.filter((sale) => !sale.paid).length
-    const totalQty = sales.reduce((s, sale) => s + sale.quantity, 0)
+    const totalQty = sales.reduce((s, sale) => s + saleQuantity(sale), 0)
     const customerIds = new Set(sales.map((s) => s.customer_id))
 
     const byFlavor = new Map<string, RankItem>()
     const byCustomer = new Map<string, RankItem>()
 
     for (const sale of sales) {
-      const flavorName = sale.cookies?.name ?? 'Desconhecido'
-      const flavor = byFlavor.get(flavorName) ?? { name: flavorName, quantity: 0, total: 0 }
-      flavor.quantity += sale.quantity
-      flavor.total += Number(sale.total)
-      byFlavor.set(flavorName, flavor)
+      for (const item of sale.sale_items ?? []) {
+        const flavorName = item.cookies?.name ?? 'Desconhecido'
+        const flavor = byFlavor.get(flavorName) ?? { name: flavorName, quantity: 0, total: 0 }
+        flavor.quantity += item.quantity
+        flavor.total += Number(item.total)
+        byFlavor.set(flavorName, flavor)
+      }
 
       const customerName = sale.customers?.name ?? 'Desconhecido'
       const customer = byCustomer.get(customerName) ?? {
@@ -66,8 +69,8 @@ export function DashboardPage() {
         quantity: 0,
         total: 0,
       }
-      customer.quantity += sale.quantity
-      customer.total += Number(sale.total)
+      customer.quantity += saleQuantity(sale)
+      customer.total += saleTotal(sale)
       byCustomer.set(customerName, customer)
     }
 
