@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
+import { CustomerAutocomplete } from '../components/CustomerAutocomplete'
 import { Input, Select } from '../components/Input'
 import { PaymentBadge } from '../components/PaymentBadge'
 import { formatCurrency, formatDate, toDateInputValue } from '../lib/format'
@@ -214,11 +215,13 @@ export function SalesPage() {
 
       <Card className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <Input
+          <CustomerAutocomplete
             label="Cliente"
+            hint="Digite ou abra a lista para filtrar"
             placeholder="Buscar cliente"
             value={customerFilter}
-            onChange={(e) => setCustomerFilter(e.target.value)}
+            onChange={setCustomerFilter}
+            selectOnly
           />
           <Select
             label="Sabor"
