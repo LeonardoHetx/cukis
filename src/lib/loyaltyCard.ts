@@ -4,7 +4,6 @@ import type { LoyaltySettings } from '../types/database'
 
 const WIDTH = 1080
 const PAD = 72
-const MAX_PURCHASES = 6
 
 const colors = {
   page: '#f7ebe0',
@@ -134,34 +133,19 @@ export async function renderLoyaltyCard(
   ctx.font = `600 38px ${SANS}`
   const messageLines = wrapText(ctx, message, cardInner)
 
-  const shown = progress.purchases.slice(0, MAX_PURCHASES)
-  const hidden = progress.purchases.length - shown.length
-  const purchaseRows = shown.length + (hidden > 0 ? 1 : 0)
-
   // Altura total (mesma sequência usada no desenho abaixo)
-  const headerH = 210
-  const nameH = 110
-  const counterH = 120
+  const nameH = 90
   const messageH = messageLines.length * 50 + 20
-  const purchasesH = purchaseRows > 0 ? 80 + purchaseRows * 52 : 0
-  const cardH = 56 + nameH + gridHeight + 40 + counterH + messageH + purchasesH + 40
-  canvas.height = PAD + headerH + cardH + 110
+  const cardH = 56 + nameH + gridHeight + 40 + messageH + 40
+  canvas.height = PAD + cardH + 110
 
   // Fundo
   ctx.fillStyle = colors.page
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  // Cabeçalho
   let y = PAD
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
-  ctx.fillStyle = colors.honeyDark
-  ctx.font = `700 30px ${SANS}`
-  ctx.fillText('CARTÃO FIDELIDADE', PAD, y + 30)
-  ctx.fillStyle = colors.cocoa
-  ctx.font = `700 120px ${DISPLAY}`
-  ctx.fillText('Cukis', PAD, y + 150)
-  y += headerH
 
   // Cartão
   ctx.beginPath()
@@ -175,12 +159,9 @@ export async function renderLoyaltyCard(
   const left = PAD + 56
   y += 56
 
-  ctx.fillStyle = colors.cocoaSoft
-  ctx.font = `600 28px ${SANS}`
-  ctx.fillText('Cliente', left, y + 26)
   ctx.fillStyle = colors.cocoa
   ctx.font = `700 54px ${DISPLAY}`
-  ctx.fillText(progress.customer.name, left, y + 86, cardInner)
+  ctx.fillText(progress.customer.name, left, y + 56, cardInner)
   y += nameH
 
   // Carimbos
@@ -201,19 +182,6 @@ export async function renderLoyaltyCard(
   }
   y += gridHeight + 40
 
-  // Contador
-  ctx.textAlign = 'left'
-  ctx.textBaseline = 'alphabetic'
-  ctx.fillStyle = colors.cocoa
-  ctx.font = `700 96px ${DISPLAY}`
-  const count = String(progress.stamps)
-  ctx.fillText(count, left, y + 90)
-  const countW = ctx.measureText(count).width
-  ctx.fillStyle = colors.cocoaSoft
-  ctx.font = `700 48px ${DISPLAY}`
-  ctx.fillText(` / ${goal} cookies`, left + countW, y + 90)
-  y += counterH
-
   ctx.fillStyle = done ? colors.honeyDark : colors.cocoa
   ctx.font = `600 38px ${SANS}`
   for (const line of messageLines) {
@@ -221,43 +189,6 @@ export async function renderLoyaltyCard(
     y += 50
   }
   y += 20
-
-  // Compras
-  if (purchaseRows > 0) {
-    ctx.strokeStyle = colors.border
-    ctx.lineWidth = 3
-    ctx.beginPath()
-    ctx.moveTo(left, y + 10)
-    ctx.lineTo(left + cardInner, y + 10)
-    ctx.stroke()
-
-    ctx.fillStyle = colors.cocoaSoft
-    ctx.font = `700 28px ${SANS}`
-    ctx.fillText('COMPRAS', left, y + 62)
-    y += 80
-
-    for (const purchase of shown) {
-      ctx.fillStyle = colors.cocoa
-      ctx.font = `400 34px ${SANS}`
-      ctx.textAlign = 'left'
-      ctx.fillText(formatDate(purchase.sold_at), left, y + 38)
-      ctx.textAlign = 'right'
-      ctx.font = `700 34px ${SANS}`
-      ctx.fillText(
-        `+${purchase.quantity} ${purchase.quantity === 1 ? 'cookie' : 'cookies'}`,
-        left + cardInner,
-        y + 38,
-      )
-      y += 52
-    }
-    if (hidden > 0) {
-      ctx.textAlign = 'left'
-      ctx.fillStyle = colors.cocoaSoft
-      ctx.font = `400 30px ${SANS}`
-      ctx.fillText(`+ ${hidden} ${hidden === 1 ? 'compra anterior' : 'compras anteriores'}`, left, y + 38)
-      y += 52
-    }
-  }
 
   // Rodapé
   ctx.textAlign = 'center'
