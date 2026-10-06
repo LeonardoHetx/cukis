@@ -182,6 +182,8 @@ export async function renderLoyaltyCard(
   }
   y += gridHeight + 40
 
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = done ? colors.honeyDark : colors.cocoa
   ctx.font = `600 38px ${SANS}`
   for (const line of messageLines) {
