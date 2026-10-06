@@ -15,6 +15,7 @@ Sistema simples de vendas de cookies — anote cliente, sabor, quantidade e valo
 - Lista de vendas com filtros (cliente, sabor, pagamento, período)
 - Dashboard: total vendido, recebido, a receber, top sabores e top clientes
 - Página de clientes com total gasto
+- **Cartão fidelidade**: meta configurável (6, 10, 15, 20… cookies), prêmio e data de início; gera um PNG do cartão para mandar no WhatsApp e registra a entrega do prêmio
 
 ## Setup local
 
@@ -22,6 +23,7 @@ Sistema simples de vendas de cookies — anote cliente, sabor, quantidade e valo
 
 1. Crie um projeto em [supabase.com](https://supabase.com)
 2. Abra **SQL Editor** e execute o arquivo [`supabase/schema.sql`](supabase/schema.sql)
+   - Projeto já existente: rode só [`supabase/migration_loyalty.sql`](supabase/migration_loyalty.sql) para ativar a fidelidade
 3. Em **Authentication → Users**, crie um usuário (email + senha) para a sua irmã
 4. Em **Project Settings → API**, copie:
    - Project URL

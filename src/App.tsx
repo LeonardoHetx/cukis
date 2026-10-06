@@ -6,6 +6,7 @@ import { CookiesPage } from './pages/CookiesPage'
 import { CustomersPage } from './pages/CustomersPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
+import { LoyaltyPage } from './pages/LoyaltyPage'
 import { NewSalePage } from './pages/NewSalePage'
 import { SalesPage } from './pages/SalesPage'
 
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="vendas/nova" element={<NewSalePage />} />
               <Route path="sabores" element={<CookiesPage />} />
               <Route path="clientes" element={<CustomersPage />} />
+              <Route path="fidelidade" element={<LoyaltyPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

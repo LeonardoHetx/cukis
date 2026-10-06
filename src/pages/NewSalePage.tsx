@@ -148,7 +148,9 @@ export function NewSalePage() {
         throw itemsError
       }
 
-      navigate('/vendas')
+      navigate('/vendas', {
+        state: { loyaltyCustomer: { id: customer.id, name: customer.name } },
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar venda')
     } finally {

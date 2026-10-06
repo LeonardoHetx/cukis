@@ -8,6 +8,7 @@ const links = [
   { to: '/vendas', label: 'Vendas' },
   { to: '/sabores', label: 'Sabores' },
   { to: '/clientes', label: 'Clientes' },
+  { to: '/fidelidade', label: 'Fidelidade' },
 ]
 
 export function Layout() {

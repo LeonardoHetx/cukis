@@ -48,6 +48,21 @@ export type CustomerStats = {
   sales_count: number
 }
 
+export type LoyaltySettings = {
+  goal: number
+  reward: string
+  starts_at: string
+}
+
+export type LoyaltyRedemption = {
+  id: string
+  customer_id: string
+  cookies_used: number
+  reward: string
+  redeemed_at: string
+  created_at: string
+}
+
 export type SaleLineDraft = {
   key: string
   cookie_id: string

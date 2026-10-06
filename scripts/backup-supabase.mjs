@@ -9,7 +9,14 @@ import { join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseConfig, loadEnvFile } from './env.mjs'
 
-const TABLES = ['cookies', 'customers', 'sales', 'sale_items']
+const TABLES = [
+  'cookies',
+  'customers',
+  'sales',
+  'sale_items',
+  'loyalty_settings',
+  'loyalty_redemptions',
+]
 const PAGE_SIZE = 1000
 const KEEP_DAILY = 30
 
@@ -26,6 +33,11 @@ async function fetchAll(client, table) {
       .select('*')
       .range(from, to)
 
+    // Tabela ainda não criada (migração pendente): exporta vazia em vez de falhar
+    if (error?.code === 'PGRST205' || error?.code === '42P01') {
+      console.warn(`${table}: tabela não existe, ignorando`)
+      return rows
+    }
     if (error) throw new Error(`${table}: ${error.message}`)
     if (!data?.length) break
 

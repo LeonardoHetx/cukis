@@ -13,10 +13,18 @@ import { getSupabaseConfig, loadEnvFile } from './env.mjs'
 
 loadEnvFile()
 
-const ORDER = ['cookies', 'customers', 'sales', 'sale_items']
+const ORDER = [
+  'cookies',
+  'customers',
+  'sales',
+  'sale_items',
+  'loyalty_settings',
+  'loyalty_redemptions',
+]
 
 async function clearTable(client, table) {
-  const { error } = await client.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  // Filtro em created_at (toda tabela tem) — funciona com id uuid ou numérico
+  const { error } = await client.from(table).delete().not('created_at', 'is', null)
   if (error) throw new Error(`Limpar ${table}: ${error.message}`)
 }
 

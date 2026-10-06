@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
 import { CustomerAutocomplete } from '../components/CustomerAutocomplete'
@@ -22,7 +22,14 @@ function newLine(cookieId = '', defaultPrice = ''): SaleLineDraft {
   }
 }
 
+type SalesLocationState = {
+  loyaltyCustomer?: { id: string; name: string }
+} | null
+
 export function SalesPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const justSold = (location.state as SalesLocationState)?.loyaltyCustomer ?? null
   const [sales, setSales] = useState<SaleWithRelations[]>([])
   const [cookies, setCookies] = useState<Cookie[]>([])
   const [loading, setLoading] = useState(true)
@@ -213,6 +220,26 @@ export function SalesPage() {
           <Button variant="secondary">Nova venda</Button>
         </Link>
       </div>
+
+      {justSold ? (
+        <Card className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-cocoa-800">
+            Venda registrada para {justSold.name}.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link to={`/fidelidade?cliente=${justSold.id}`}>
+              <Button size="sm">Gerar cartão fidelidade</Button>
+            </Link>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => navigate('.', { replace: true, state: null })}
+            >
+              Fechar
+            </Button>
+          </div>
+        </Card>
+      ) : null}
 
       <Card className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
