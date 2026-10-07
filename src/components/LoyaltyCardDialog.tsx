@@ -16,15 +16,18 @@ export function LoyaltyCardDialog({ progress, settings, onClose }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let objectUrl: string | null = null
     let cancelled = false
 
+    // Data URL em vez de blob URL: no iOS o Safari pode abrir o link de
+    // download na própria aba, e um blob URL expira (ao fechar o diálogo ou
+    // quando o Safari descarrega a aba), deixando a aba presa em
+    // "WebKitBlobResource error 1". Um data URL continua válido.
     renderLoyaltyCard(progress, settings)
-      .then((result) => {
+      .then(async (result) => {
+        const dataUrl = await blobToDataUrl(result)
         if (cancelled) return
-        objectUrl = URL.createObjectURL(result)
         setBlob(result)
-        setUrl(objectUrl)
+        setUrl(dataUrl)
       })
       .catch((err) => {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Erro ao gerar cartão')
@@ -32,7 +35,6 @@ export function LoyaltyCardDialog({ progress, settings, onClose }: Props) {
 
     return () => {
       cancelled = true
-      if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
   }, [progress, settings])
 
@@ -113,4 +115,13 @@ export function LoyaltyCardDialog({ progress, settings, onClose }: Props) {
       </div>
     </div>
   )
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error ?? new Error('Falha ao ler imagem'))
+    reader.readAsDataURL(blob)
+  })
 }
