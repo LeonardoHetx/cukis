@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
 import { Input } from '../components/Input'
+import { resolveLoginEmail } from '../lib/loginUsers'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 export function LoginPage() {
@@ -12,7 +13,7 @@ export function LoginPage() {
   const location = useLocation()
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/'
 
-  const [email, setEmail] = useState('')
+  const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -25,10 +26,10 @@ export function LoginPage() {
     e.preventDefault()
     setError(null)
     setSubmitting(true)
-    const result = await signIn(email.trim(), password)
+    const result = await signIn(resolveLoginEmail(login), password)
     setSubmitting(false)
     if (result.error) {
-      setError('Email ou senha inválidos. Tente novamente.')
+      setError('Usuário ou senha inválidos. Tente novamente.')
       return
     }
     navigate(from, { replace: true })
@@ -55,13 +56,16 @@ export function LoginPage() {
           ) : null}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <Input
-              label="Email"
-              type="email"
-              name="email"
-              autoComplete="email"
+              label="Usuário"
+              type="text"
+              name="username"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
             />
             <Input
               label="Senha"

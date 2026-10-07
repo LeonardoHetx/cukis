@@ -16,6 +16,7 @@ type AuthContextValue = {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  updatePassword: (password: string) => Promise<{ error: string | null; code: string | null }>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -62,6 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }, [])
 
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password })
+    return { error: error?.message ?? null, code: error?.code ?? null }
+  }, [])
+
   const value = useMemo(
     () => ({
       session,
@@ -69,8 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       signIn,
       signOut,
+      updatePassword,
     }),
-    [session, loading, signIn, signOut],
+    [session, loading, signIn, signOut, updatePassword],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

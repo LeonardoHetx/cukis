@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Button } from './Button'
+import { ChangePasswordDialog } from './ChangePasswordDialog'
 
 const links = [
   { to: '/', label: 'Início', end: true },
@@ -14,6 +16,7 @@ const links = [
 export function Layout() {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
+  const [changingPassword, setChangingPassword] = useState(false)
 
   async function handleSignOut() {
     await signOut()
@@ -34,9 +37,14 @@ export function Layout() {
             {user?.email ?? 'Controle de vendas'}
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleSignOut}>
-          Sair
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={() => setChangingPassword(true)}>
+            Trocar senha
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            Sair
+          </Button>
+        </div>
       </header>
 
       <nav className="mb-6 hidden gap-1 rounded-2xl border border-biscuit-200/80 bg-white/60 p-1.5 backdrop-blur-sm lg:flex">
@@ -82,6 +90,10 @@ export function Layout() {
           ))}
         </div>
       </nav>
+
+      {changingPassword ? (
+        <ChangePasswordDialog onClose={() => setChangingPassword(false)} />
+      ) : null}
     </div>
   )
 }
